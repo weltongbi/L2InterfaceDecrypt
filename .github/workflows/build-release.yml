@@ -17,24 +17,43 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Configure (Win32, Release)
-        run: cmake -S . -B build -G "Visual Studio 17 2022" -A Win32
+      # Usa vswhere + VsDevCmd (x86) + Ninja: funciona com qualquer
+      # versão de Visual Studio instalada no runner (17, 18, ...).
+      - name: Build (MSVC x86 + Ninja)
+        shell: pwsh
+        run: |
+          $vswhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
+          $vsPath = & $vswhere -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath
+          if (-not $vsPath) { Write-Error "Visual Studio with C++ tools not found"; exit 1 }
+          Write-Host "Visual Studio: $vsPath"
 
-      - name: Build (Release)
-        run: cmake --build build --config Release
+          # Carrega o ambiente do toolchain x86
+          cmd /c "`"$vsPath\Common7\Tools\VsDevCmd.bat`" -arch=x86 -host_arch=x64 >nul && set" |
+            ForEach-Object {
+              if ($_ -match '^([^=]+)=(.*)$') {
+                [Environment]::SetEnvironmentVariable($Matches[1], $Matches[2], 'Process')
+              }
+            }
+
+          # Garante o Ninja (do VS ou do PATH)
+          $ninjaDir = Join-Path $vsPath 'Common7\IDE\CommonExtensions\Microsoft\CMake\Ninja'
+          if (Test-Path $ninjaDir) { $env:PATH = "$ninjaDir;$env:PATH" }
+
+          cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
+          cmake --build build
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: l2ui
           path: |
-            build/Release/l2ui.dll
-            build/Release/l2ui.pdb
+            build/l2ui.dll
+            build/l2ui.pdb
 
       - name: Create GitHub Release
         if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            build/Release/l2ui.dll
-            build/Release/l2ui.pdb
+            build/l2ui.dll
+            build/l2ui.pdb
