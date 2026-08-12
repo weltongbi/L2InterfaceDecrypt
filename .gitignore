@@ -1,0 +1,23 @@
+# Build (CMake / Ninja)
+build/
+build-vscode/
+buildx/
+out/
+.dist/
+compile_commands.json
+
+# Visual Studio (resquícios)
+.vs/
+*.user
+CMakeUserPresets.json
+
+# Python (add_import.py)
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+
+# Sistema / editores
+Thumbs.db
+Desktop.ini
+.DS_Store

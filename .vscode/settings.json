@@ -1,0 +1,62 @@
+{
+  "workbench.editor.enablePreview": false,
+  "editor.fontSize": 15,
+  "commentTranslate.source": "Google",
+  "commentTranslate.targetLanguage": "pt",
+  "commentTranslate.browse.mode": "contrast",
+  "chat.agent.maxRequests": 100,
+  "cSpell.language": "en,pt",
+  "editor.formatOnSave": true,
+  // IntelliSense usa o compile_commands.json gerado pelo CMake (Ninja)
+  "C_Cpp.default.compileCommands": "${workspaceFolder}/build/compile_commands.json",
+  "C_Cpp.default.cppStandard": "c++17",
+  // Botões na barra de status (extensão VS Code Task Buttons)
+  "VsCodeTaskButtons.tasks": [
+    {
+      "label": "Compilar DLL",
+      "task": "CMake: Compilar",
+      "tooltip": "Compila a l2ui.dll (configura sozinho na 1ª vez)",
+      "color": "warning"
+    },
+    {
+      "label": "Configurar (Release)",
+      "task": "CMake: Configurar (Release)",
+      "tooltip": "Reconfigura o CMake em Release (x86)",
+      "color": "default"
+    },
+    {
+      "label": "Configurar (Debug)",
+      "task": "CMake: Configurar (Debug)",
+      "tooltip": "Reconfigura o CMake em Debug (x86)",
+      "color": "default"
+    },
+    {
+      "label": "Limpar Build",
+      "task": "CMake: Limpar",
+      "tooltip": "Apaga os objetos gerados",
+      "color": "default"
+    },
+    {
+      "label": "Patch IAT (Engine.dll)",
+      "task": "IAT: Adicionar import (add_import.py)",
+      "tooltip": "Adiciona l2ui.dll!L2UI_Init na tabela de imports da Engine.dll",
+      "color": "error"
+    }
+  ],
+  // Se usar a extensão CMake Tools (opcional), ela usa uma pasta separada
+  // para não conflitar com as tasks acima. IMPORTANTE: selecione um kit x86
+  // (Win32) na barra de status, pois o L2 é um cliente 32-bit.
+  "cmake.buildDirectory": "${workspaceFolder}/build-vscode/${buildType}",
+  "cmake.generator": "Ninja",
+  "cmake.configureArgs": [
+    "-DCMAKE_EXPORT_COMPILE_COMMANDS=ON"
+  ],
+  // Oculta apenas resquícios do Visual Studio (não usados no VS Code).
+  // A pasta build/ (com a l2ui.dll) continua visível.
+  "files.exclude": {
+    "**/.vs": true,
+    "buildx": true,
+    "out": true,
+    ".dist": true
+  }
+}
