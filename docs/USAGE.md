@@ -152,7 +152,14 @@ file5=NWindow.u
   missing key. Max 512 entries.
 - Full-line comments start with `;`.
 - Only original file names (no paths) — each one is loaded from
-  `..\system\<name>` as usual.
+  `..\<client folder>\<name>`. The client folder is auto-detected
+  from the folder where `l2ui.dll` sits (e.g. `system_en`,
+  `system_ru`), with a `..\system` fallback. To force it:
+
+  ```ini
+  [paths]
+  system=system_ru
+  ```
 - If the INI exists but `[files]` is empty/malformed, **nothing is
   dumped** — `overlay.log` says so.
 - Remove `l2ui.ini` to fall back to the built-in list.
@@ -172,7 +179,8 @@ static const wchar_t *kDumpList[] = {
 ```
 
 Rebuild after changing it. Each file is loaded from
-`..\system\<name>` (the path the game sees) and saved to
+`..\<client folder>\<name>` (the path the game sees — auto-detected
+from the DLL folder, see §4.1) and saved to
 `<l2ui.dll folder>\decrypted\<name>`.
 
 ---

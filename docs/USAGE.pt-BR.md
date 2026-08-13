@@ -153,7 +153,14 @@ file5=NWindow.u
   chave ausente. Máximo de 512 entradas.
 - Comentários de linha inteira começam com `;`.
 - Somente o nome original do arquivo (sem caminho) — cada um é
-  carregado de `..\system\<nome>`, como sempre.
+  carregado de `..\<pasta do cliente>\<nome>`. A pasta do cliente é
+  auto-detectada pela pasta onde a `l2ui.dll` está (ex.: `system_en`,
+  `system_ru`), com fallback `..\system`. Para forçar:
+
+  ```ini
+  [paths]
+  system=system_ru
+  ```
 - Se o INI existir mas a seção `[files]` estiver vazia/malformada,
   **nada é dumpado** — o `overlay.log` avisa.
 - Remova o `l2ui.ini` para voltar à lista interna.
@@ -173,7 +180,8 @@ static const wchar_t *kDumpList[] = {
 ```
 
 Recompile depois de mudar. Cada arquivo é carregado de
-`..\system\<nome>` (o caminho que o jogo enxerga) e salvo em
+`..\<pasta do cliente>\<nome>` (o caminho que o jogo enxerga —
+auto-detectado pela pasta da DLL, ver §4.1) e salvo em
 `<pasta da l2ui.dll>\decrypted\<nome>`.
 
 ---

@@ -10,7 +10,8 @@
 ;   - Se o l2ui.ini existir, ele SUBSTITUI a lista interna (kDumpList).
 ;   - Seção [files], chaves file1, file2, ... em sequência (máx. 512).
 ;   - Somente o NOME ORIGINAL do arquivo (sem caminho) — a carga vira
-;     ..\system\<nome> automaticamente.
+;     ..\<pasta do cliente>\<nome> automaticamente (a pasta é detectada
+;     pelo nome da pasta onde a l2ui.dll está; ver seção [paths] abaixo).
 ;   - Linhas de comentário começam com ;
 ;   - Se a seção [files] estiver vazia, nada é dumpado.
 ;   - Remova o l2ui.ini para voltar à lista interna.
@@ -22,3 +23,9 @@ file2=Interface.u
 file3=Core.u
 file4=Engine.u
 file5=NWindow.u
+
+; OPCIONAL: força a pasta virtual do cliente, caso a auto-detecção não sirva
+; (a pasta onde a l2ui.dll está já é detectada automaticamente).
+; Descomente as duas linhas abaixo e ajuste o nome:
+;[paths]
+;system=system_en

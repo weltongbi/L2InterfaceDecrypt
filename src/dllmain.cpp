@@ -93,6 +93,37 @@ static const wchar_t *GetIniPath()
     return s_path;
 }
 
+// Pasta "virtual" do cliente — como o jogo endereça a pasta de dados
+// ("system", "system_en", "system_ru", ...). Prioridade:
+//   1. l2ui.ini → [paths] system=<nome>  (override manual)
+//   2. Auto-detect: nome da pasta onde a l2ui.dll está.
+static const wchar_t *GetSystemDirName()
+{
+    static wchar_t s_name[MAX_PATH] = {0};
+    if (s_name[0])
+        return s_name;
+
+    const wchar_t *ini = GetIniPath();
+    if (GetFileAttributesW(ini) != INVALID_FILE_ATTRIBUTES)
+    {
+        wchar_t override[MAX_PATH] = {0};
+        if (GetPrivateProfileStringW(L"paths", L"system", L"", override, MAX_PATH, ini) > 0 &&
+            override[0] != L'\0')
+        {
+            wcscpy(s_name, override);
+            return s_name;
+        }
+    }
+
+    // Último componente do diretório da DLL: system_en, system_ru, ...
+    const wchar_t *dllDir = GetDllDir();
+    const wchar_t *slash = wcsrchr(dllDir, L'\\');
+    wcscpy(s_name, slash ? slash + 1 : dllDir);
+    if (!s_name[0])
+        wcscpy(s_name, L"system"); // nunca deveria acontecer
+    return s_name;
+}
+
 // Lê a lista de arquivos do l2ui.ini. Retorna false se o INI não existir
 // (aí usa-se o kDumpList interno). Se existir, out recebe os nomes lidos;
 // lista vazia = INI presente mas seção [files] vazia/malformada.
@@ -247,11 +278,13 @@ static bool DumpOne(const wchar_t *name)
         resolved = true;
     }
 
-    wchar_t srcPath[MAX_PATH];
-    _snwprintf(srcPath, MAX_PATH, L"..\\system\\%s", name);
-
     wchar_t dstPath[MAX_PATH];
     BuildDstPath(dstPath, MAX_PATH, name);
+
+    // Caminho de carga: "..\<pasta virtual>\<nome>". A pasta virtual é
+    // auto-detectada pelo nome da pasta da DLL (ou vem do l2ui.ini).
+    wchar_t srcPath[MAX_PATH];
+    _snwprintf(srcPath, MAX_PATH, L"..\\%s\\%s", GetSystemDirName(), name);
 
     char TArray[0x14];
     memset(TArray, 0, 0x14);
@@ -259,6 +292,24 @@ static bool DumpOne(const wchar_t *name)
     appLoadFileToArray(TArray, srcPath, *gFileManager);
     // TArray<T> em memória: [0]=ponteiro de dados, [4]=ArrayNum, [8]=ArrayMax
     int loadedBytes = *(int *)(TArray + 4);
+
+    // Fallback: clientes que sempre endereçam a pasta como "system".
+    if (loadedBytes == 0)
+    {
+        wchar_t legacyPath[MAX_PATH];
+        _snwprintf(legacyPath, MAX_PATH, L"..\\system\\%s", name);
+        if (wcscmp(legacyPath, srcPath) != 0)
+        {
+            memset(TArray, 0, 0x14);
+            appLoadFileToArray(TArray, legacyPath, *gFileManager);
+            const int legacyBytes = *(int *)(TArray + 4);
+            if (legacyBytes > 0)
+            {
+                wcscpy(srcPath, legacyPath);
+                loadedBytes = legacyBytes;
+            }
+        }
+    }
 
     appSaveArrayToFile(TArray, dstPath, *gFileManager);
 
@@ -273,6 +324,8 @@ static bool DumpOne(const wchar_t *name)
 
 static void DumpAllFiles()
 {
+    DumpLog("dump: pasta virtual do cliente: ..\\%ls", GetSystemDirName());
+
     std::vector<std::wstring> iniFiles;
     const bool hasIni = LoadDumpListFromIni(iniFiles);
 

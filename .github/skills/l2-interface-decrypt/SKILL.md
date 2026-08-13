@@ -46,7 +46,7 @@ L2.exe → Engine.dll (IAT: l2ui.dll!L2UI_Init) → l2ui.dll
   - `?appSaveArrayToFile@@YAHABV?$TArray@E@@PB_WPAVFFileManager@@@Z`
   - `?GFileManager@@3PAVFFileManager@@A` (global: ponteiro para o FFileManager)
 - **TArray** buffer de `0x14` bytes: `[0]` = ponteiro de dados, `[4]` = ArrayNum (tamanho carregado), `[8]` = ArrayMax.
-- **Caminho de carga:** `..\system\<nome>` (como o jogo enxerga). **Caminho de gravação:** absoluto, calculado por `GetDecryptedDir()`/`BuildDstPath()`.
+- **Caminho de carga:** `..\<pasta virtual>\<nome>` — pasta auto-detectada pelo nome da pasta da DLL (`GetSystemDirName()`), com override no l2ui.ini (`[paths] system=...`) e fallback `..\system` quando carrega 0 bytes. **Caminho de gravação:** absoluto, calculado por `GetDecryptedDir()`/`BuildDstPath()`.
 - **Config opcional `l2ui.ini`:** se existir ao lado da DLL, **substitui** o `kDumpList`. Seção `[files]`, chaves `file1`, `file2`, … lidas em sequência até a primeira ausente (máx. 512). INI presente com `[files]` vazia = nada é dumpado (log avisa). Funções: `GetIniPath()`/`LoadDumpListFromIni()` em `src/dllmain.cpp`.
 
 ## 📁 Estrutura do projeto
