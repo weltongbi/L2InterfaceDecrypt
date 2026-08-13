@@ -42,6 +42,17 @@ jobs:
           cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
           cmake --build build
 
+      # Empacota o release: l2ui.zip com a DLL + o template do INI.
+      - name: Package (l2ui.zip: l2ui.dll + l2ui.ini.example)
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Path dist -Force | Out-Null
+          Copy-Item build\l2ui.dll dist\
+          Copy-Item l2ui.ini.example dist\
+          Compress-Archive `
+            -Path "dist\l2ui.dll", "dist\l2ui.ini.example" `
+            -DestinationPath "dist\l2ui.zip"
+
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
@@ -49,11 +60,12 @@ jobs:
           path: |
             build/l2ui.dll
             build/l2ui.pdb
+            dist/l2ui.zip
 
       - name: Create GitHub Release
         if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            build/l2ui.dll
+            dist/l2ui.zip
             build/l2ui.pdb
