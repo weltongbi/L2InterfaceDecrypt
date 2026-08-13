@@ -101,17 +101,19 @@ Everything lands in a `decrypted` folder created next to the DLL:
 C:\Games\L2\System_en\decrypted\
 ├── overlay.log
 ├── Interface.xdat
-├── Interface.ui
-├── core.ui
-└── engine.ui
+├── Interface.u
+├── Core.u
+├── Engine.u
+└── NWindow.u
 ```
 
 Expected log (`overlay.log`):
 
 ```
+[12:34:56.789 pid=12340 tid=5678] dump: l2ui.ini nao encontrado — usando kDumpList interno
 [12:34:56.789 pid=12340 tid=5678] dump: ..\system\Interface.xdat -> C:\Games\L2\System_en\decrypted\Interface.xdat
-[12:34:56.789 pid=12340 tid=5678] dump: ..\system\Interface.ui -> C:\Games\L2\System_en\decrypted\Interface.ui
-[12:34:56.789 pid=12340 tid=5678] dump: concluido (4/4 arquivos)
+[12:34:56.789 pid=12340 tid=5678] dump: ..\system\Interface.u -> C:\Games\L2\System_en\decrypted\Interface.u
+[12:34:56.789 pid=12340 tid=5678] dump: concluido (5/5 arquivos)
 ```
 
 The `dump:` lines are always written, even in Release builds. The
@@ -121,20 +123,57 @@ attach info (`=== l2ui.dll ATTACH ===` etc.) is Debug-only.
 
 ## 4. Changing the file list
 
+Two ways — the optional INI wins when present.
+
+### 4.1. Optional config: `l2ui.ini` (no rebuild needed)
+
+Create `l2ui.ini` **next to `l2ui.dll`** (same folder). When this
+file exists, the DLL reads the list from it and **ignores the
+built-in `kDumpList`**. A ready-to-use template is included in the
+repo as [`l2ui.ini.example`](../l2ui.ini.example) — copy it next to
+the DLL and rename it to `l2ui.ini`:
+
+```bat
+copy l2ui.ini.example "C:\Games\L2\System_en\l2ui.ini"
+```
+
+Example contents:
+```ini
+; l2ui.ini — optional dump list (section [files], keys file1..fileN)
+[files]
+file1=Interface.xdat
+file2=Interface.u
+file3=Core.u
+file4=Engine.u
+file5=NWindow.u
+```
+
+- Keys are read in order (`file1`, `file2`, …) until the first
+  missing key. Max 512 entries.
+- Full-line comments start with `;`.
+- Only original file names (no paths) — each one is loaded from
+  `..\system\<name>` as usual.
+- If the INI exists but `[files]` is empty/malformed, **nothing is
+  dumped** — `overlay.log` says so.
+- Remove `l2ui.ini` to fall back to the built-in list.
+
+### 4.2. Built-in list (fallback)
+
 Edit `kDumpList` in `src/dllmain.cpp`:
 
 ```cpp
 static const wchar_t *kDumpList[] = {
     L"Interface.xdat",
-    L"Interface.ui",
-    L"core.ui",
-    L"engine.ui",
+    L"Interface.u",
+    L"Core.u",
+    L"Engine.u",
+    L"NWindow.u",
 };
 ```
 
 Rebuild after changing it. Each file is loaded from
 `..\system\<name>` (the path the game sees) and saved to
-`<pasta da l2ui.dll>\decrypted\<name>`.
+`<l2ui.dll folder>\decrypted\<name>`.
 
 ---
 

@@ -2,7 +2,7 @@
 
 Dump-only helper DLL for Lineage II clients. Drop-in `l2ui.dll`
 that side-loads into the client and decrypts a configurable list of
-`.xdat`/`.ui` files through the game's own `FFileManager` API,
+`.xdat`/`.u` files through the game's own `FFileManager` API,
 writing the results to a `decrypted` folder next to the DLL.
 
 **🇧🇷 Versão em português:** [README.pt-BR.md](README.pt-BR.md)
@@ -33,7 +33,10 @@ Use at your own risk.
 
 - **Bulk file dump** — the `kDumpList` array in `src/dllmain.cpp`
   lists files by their original names (`Interface.xdat`,
-  `Interface.ui`, `core.ui`, `engine.ui`).
+  `Interface.u`, `Core.u`, `Engine.u`, `NWindow.u`).
+- **Optional `l2ui.ini`** — create `l2ui.ini` next to the DLL with a
+  `[files]` section (`file1=`, `file2=`, …) to override the built-in
+  list without recompiling.
 - **Decrypts via the game itself** — loads each file with Core.dll's
   `appLoadFileToArray` and saves it with `appSaveArrayToFile`
   through the game's `GFileManager`, so the output is already
@@ -87,7 +90,8 @@ Full step-by-step guides:
   via CFF Explorer or the bundled Python script. Windows loads
   `l2ui.dll` when Engine.dll's imports are resolved.
 - Once `WinDrv.dll` is present, the DLL calls Core.dll's
-  file-manager API for every file in `kDumpList` and saves the
+  file-manager API for every file in `kDumpList` — or in
+  `l2ui.ini`, when that file exists next to the DLL — and saves the
   decrypted content to `<game>\System_en\decrypted\<name>`.
 - `overlay.log`, in the same `decrypted` folder, records each
   `source -> destination` pair and a final `concluido (n/m)` line.

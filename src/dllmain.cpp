@@ -14,6 +14,8 @@
 #include <cstdlib>
 #include <cstring>
 #include <cwchar>
+#include <string>
+#include <vector>
 
 extern "C"
 {
@@ -39,9 +41,19 @@ static const wchar_t *kDumpList[] = {
     L"NWindow.u",
 };
 
-// Diretório de saída: <pasta da l2ui.dll>\decrypted (criado se não existir).
-// Tanto o log quanto os arquivos dumpados ficam aqui.
-static const wchar_t *GetDecryptedDir()
+// -----------------------------------------------------------------------------
+// l2ui.ini (OPCIONAL) — lista externa de arquivos.
+// Se existir ao lado da DLL, SUBSTITUI o kDumpList acima (sem recompilar).
+// Formato:
+//   [files]
+//   file1=Interface.xdat
+//   file2=Core.u
+// Chaves lidas em sequência (file1, file2, ...) até a primeira ausente.
+// -----------------------------------------------------------------------------
+static const int kMaxIniFiles = 512;
+
+// Diretório da DLL (lazy, 1x por processo) — base de decrypted\ e l2ui.ini.
+static const wchar_t *GetDllDir()
 {
     static wchar_t s_dir[MAX_PATH] = {0};
     if (s_dir[0])
@@ -53,9 +65,66 @@ static const wchar_t *GetDecryptedDir()
     if (slash)
         *slash = L'\0'; // fica só o diretório da DLL
 
-    _snwprintf(s_dir, MAX_PATH, L"%s\\decrypted", dllPath);
+    wcscpy(s_dir, dllPath);
+    return s_dir;
+}
+
+// Diretório de saída: <pasta da l2ui.dll>\decrypted (criado se não existir).
+// Tanto o log quanto os arquivos dumpados ficam aqui.
+static const wchar_t *GetDecryptedDir()
+{
+    static wchar_t s_dir[MAX_PATH] = {0};
+    if (s_dir[0])
+        return s_dir;
+
+    _snwprintf(s_dir, MAX_PATH, L"%s\\decrypted", GetDllDir());
     CreateDirectoryW(s_dir, nullptr); // ok se já existir
     return s_dir;
+}
+
+// Caminho do config opcional: <pasta da l2ui.dll>\l2ui.ini
+static const wchar_t *GetIniPath()
+{
+    static wchar_t s_path[MAX_PATH] = {0};
+    if (s_path[0])
+        return s_path;
+
+    _snwprintf(s_path, MAX_PATH, L"%s\\l2ui.ini", GetDllDir());
+    return s_path;
+}
+
+// Lê a lista de arquivos do l2ui.ini. Retorna false se o INI não existir
+// (aí usa-se o kDumpList interno). Se existir, out recebe os nomes lidos;
+// lista vazia = INI presente mas seção [files] vazia/malformada.
+static bool LoadDumpListFromIni(std::vector<std::wstring> &out)
+{
+    const wchar_t *ini = GetIniPath();
+    if (GetFileAttributesW(ini) == INVALID_FILE_ATTRIBUTES)
+        return false;
+
+    out.clear();
+    for (int i = 1; i <= kMaxIniFiles; ++i)
+    {
+        wchar_t key[32] = {0};
+        _snwprintf(key, sizeof(key) / sizeof(key[0]), L"file%d", i);
+
+        wchar_t value[MAX_PATH] = {0};
+        if (GetPrivateProfileStringW(L"files", key, L"", value, MAX_PATH, ini) == 0)
+            break; // chave ausente: fim da lista
+
+        // Trim simples (nomes de arquivo não têm espaços).
+        wchar_t *beg = value;
+        while (*beg == L' ' || *beg == L'\t')
+            ++beg;
+        wchar_t *end = value + wcslen(value);
+        while (end > beg && (end[-1] == L' ' || end[-1] == L'\t'))
+            --end;
+        *end = L'\0';
+
+        if (beg[0] != L'\0')
+            out.push_back(beg);
+    }
+    return true;
 }
 
 // Caminho do log: <pasta da l2ui.dll>\decrypted\overlay.log (lazy, 1x por processo).
@@ -204,14 +273,36 @@ static bool DumpOne(const wchar_t *name)
 
 static void DumpAllFiles()
 {
+    std::vector<std::wstring> iniFiles;
+    const bool hasIni = LoadDumpListFromIni(iniFiles);
+
     int ok = 0;
-    int total = (int)(sizeof(kDumpList) / sizeof(kDumpList[0]));
-    for (int i = 0; i < total; ++i)
+    if (hasIni)
     {
-        if (DumpOne(kDumpList[i]))
-            ++ok;
+        if (iniFiles.empty())
+        {
+            DumpLog("dump: l2ui.ini presente, mas a secao [files] esta vazia — nenhum arquivo sera dumpado");
+            return;
+        }
+        DumpLog("dump: usando l2ui.ini (%u arquivos) — kDumpList interno ignorado", (unsigned)iniFiles.size());
+        for (size_t i = 0; i < iniFiles.size(); ++i)
+        {
+            if (DumpOne(iniFiles[i].c_str()))
+                ++ok;
+        }
+        DumpLog("dump: concluido (%d/%u arquivos)", ok, (unsigned)iniFiles.size());
     }
-    DumpLog("dump: concluido (%d/%d arquivos)", ok, total);
+    else
+    {
+        DumpLog("dump: l2ui.ini nao encontrado — usando kDumpList interno");
+        const int total = (int)(sizeof(kDumpList) / sizeof(kDumpList[0]));
+        for (int i = 0; i < total; ++i)
+        {
+            if (DumpOne(kDumpList[i]))
+                ++ok;
+        }
+        DumpLog("dump: concluido (%d/%d arquivos)", ok, total);
+    }
 }
 
 bool dumped = false;

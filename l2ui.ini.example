@@ -1,0 +1,24 @@
+; ============================================================================
+; l2ui.ini.example — lista de arquivos para dump (OPCIONAL)
+;
+; PARA USAR:
+;   1. Copie este arquivo para a pasta do jogo (System_en\), AO LADO da l2ui.dll
+;   2. Renomeie para "l2ui.ini"
+;   3. Ajuste a lista como quiser
+;
+; REGRAS:
+;   - Se o l2ui.ini existir, ele SUBSTITUI a lista interna (kDumpList).
+;   - Seção [files], chaves file1, file2, ... em sequência (máx. 512).
+;   - Somente o NOME ORIGINAL do arquivo (sem caminho) — a carga vira
+;     ..\system\<nome> automaticamente.
+;   - Linhas de comentário começam com ;
+;   - Se a seção [files] estiver vazia, nada é dumpado.
+;   - Remova o l2ui.ini para voltar à lista interna.
+; ============================================================================
+
+[files]
+file1=Interface.xdat
+file2=Interface.u
+file3=Core.u
+file4=Engine.u
+file5=NWindow.u

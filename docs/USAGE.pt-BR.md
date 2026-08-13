@@ -101,17 +101,19 @@ Tudo vai pra uma pasta `decrypted` criada ao lado da DLL:
 C:\Games\L2\System_en\decrypted\
 ├── overlay.log
 ├── Interface.xdat
-├── Interface.ui
-├── core.ui
-└── engine.ui
+├── Interface.u
+├── Core.u
+├── Engine.u
+└── NWindow.u
 ```
 
 Log esperado (`overlay.log`):
 
 ```
+[12:34:56.789 pid=12340 tid=5678] dump: l2ui.ini nao encontrado — usando kDumpList interno
 [12:34:56.789 pid=12340 tid=5678] dump: ..\system\Interface.xdat -> C:\Games\L2\System_en\decrypted\Interface.xdat
-[12:34:56.789 pid=12340 tid=5678] dump: ..\system\Interface.ui -> C:\Games\L2\System_en\decrypted\Interface.ui
-[12:34:56.789 pid=12340 tid=5678] dump: concluido (4/4 arquivos)
+[12:34:56.789 pid=12340 tid=5678] dump: ..\system\Interface.u -> C:\Games\L2\System_en\decrypted\Interface.u
+[12:34:56.789 pid=12340 tid=5678] dump: concluido (5/5 arquivos)
 ```
 
 As linhas `dump:` são sempre gravadas, mesmo em build Release. As
@@ -122,14 +124,51 @@ Debug.
 
 ## 4. Mudando a lista de arquivos
 
+Duas formas — o INI opcional tem prioridade quando presente.
+
+### 4.1. Config opcional: `l2ui.ini` (sem recompilar)
+
+Crie um `l2ui.ini` **ao lado da `l2ui.dll`** (mesma pasta). Quando
+esse arquivo existe, a DLL lê a lista dele e **ignora o `kDumpList`
+interno**. Um template pronto está no repositório como
+[`l2ui.ini.example`](../l2ui.ini.example) — copie-o para a pasta do
+jogo e renomeie para `l2ui.ini`:
+
+```bat
+copy l2ui.ini.example "C:\Games\L2\System_en\l2ui.ini"
+```
+
+Conteúdo de exemplo:
+```ini
+; l2ui.ini — lista de dump opcional (seção [files], chaves file1..fileN)
+[files]
+file1=Interface.xdat
+file2=Interface.u
+file3=Core.u
+file4=Engine.u
+file5=NWindow.u
+```
+
+- As chaves são lidas em ordem (`file1`, `file2`, …) até a primeira
+  chave ausente. Máximo de 512 entradas.
+- Comentários de linha inteira começam com `;`.
+- Somente o nome original do arquivo (sem caminho) — cada um é
+  carregado de `..\system\<nome>`, como sempre.
+- Se o INI existir mas a seção `[files]` estiver vazia/malformada,
+  **nada é dumpado** — o `overlay.log` avisa.
+- Remova o `l2ui.ini` para voltar à lista interna.
+
+### 4.2. Lista interna (fallback)
+
 Edite o `kDumpList` em `src/dllmain.cpp`:
 
 ```cpp
 static const wchar_t *kDumpList[] = {
     L"Interface.xdat",
-    L"Interface.ui",
-    L"core.ui",
-    L"engine.ui",
+    L"Interface.u",
+    L"Core.u",
+    L"Engine.u",
+    L"NWindow.u",
 };
 ```
 
