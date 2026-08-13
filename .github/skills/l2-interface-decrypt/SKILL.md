@@ -60,8 +60,9 @@ L2.exe → Engine.dll (IAT: l2ui.dll!L2UI_Init) → l2ui.dll
 │   └── build.ps1              # configura sozinho (Release) na 1ª vez e compila
 ├── .vscode/
 │   ├── tasks.json             # Configurar (Release/Debug), Compilar, Limpar, IAT patch
-│   ├── settings.json          # compile_commands + botões (VsCodeTaskButtons.tasks)
-│   └── extensions.json        # ms-vscode.cpptools, cmake-tools, python
+│   ├── settings.json          # compile_commands + config CMake Tools
+│   ├── task-buttons.json      # botões da status bar (condor304.task-buttons)
+│   └── extensions.json        # ms-vscode.cpptools, cmake-tools, python, condor304.task-buttons
 ├── .github/workflows/
 │   └── build-release.yml      # tag v* → build x86 (vswhere+Ninja) → Release no GitHub
 ├── docs/                      # BUILDING.*.md e USAGE.*.md — SEMPRE em EN + pt-BR

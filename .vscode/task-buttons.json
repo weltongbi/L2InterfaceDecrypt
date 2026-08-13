@@ -1,0 +1,34 @@
+{
+  "buttons": [
+    {
+      "name": "Compilar DLL",
+      "task": "CMake: Compilar",
+      "icon": "🔨",
+      "tooltip": "Compila a l2ui.dll (configura sozinho na 1ª vez)"
+    },
+    {
+      "name": "Configurar (Release)",
+      "task": "CMake: Configurar (Release)",
+      "icon": "⚙️",
+      "tooltip": "Reconfigura o CMake em Release (x86)"
+    },
+    {
+      "name": "Configurar (Debug)",
+      "task": "CMake: Configurar (Debug)",
+      "icon": "🐞",
+      "tooltip": "Reconfigura o CMake em Debug (x86)"
+    },
+    {
+      "name": "Limpar Build",
+      "task": "CMake: Limpar",
+      "icon": "🗑️",
+      "tooltip": "Apaga os objetos gerados"
+    },
+    {
+      "name": "Patch IAT (Engine.dll)",
+      "task": "IAT: Adicionar import (add_import.py)",
+      "icon": "🔗",
+      "tooltip": "Adiciona l2ui.dll!L2UI_Init na tabela de imports da Engine.dll"
+    }
+  ]
+}

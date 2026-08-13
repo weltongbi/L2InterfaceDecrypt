@@ -10,39 +10,8 @@
   // IntelliSense usa o compile_commands.json gerado pelo CMake (Ninja)
   "C_Cpp.default.compileCommands": "${workspaceFolder}/build/compile_commands.json",
   "C_Cpp.default.cppStandard": "c++17",
-  // Botões na barra de status (extensão VS Code Task Buttons)
-  "VsCodeTaskButtons.tasks": [
-    {
-      "label": "Compilar DLL",
-      "task": "CMake: Compilar",
-      "tooltip": "Compila a l2ui.dll (configura sozinho na 1ª vez)",
-      "color": "warning"
-    },
-    {
-      "label": "Configurar (Release)",
-      "task": "CMake: Configurar (Release)",
-      "tooltip": "Reconfigura o CMake em Release (x86)",
-      "color": "default"
-    },
-    {
-      "label": "Configurar (Debug)",
-      "task": "CMake: Configurar (Debug)",
-      "tooltip": "Reconfigura o CMake em Debug (x86)",
-      "color": "default"
-    },
-    {
-      "label": "Limpar Build",
-      "task": "CMake: Limpar",
-      "tooltip": "Apaga os objetos gerados",
-      "color": "default"
-    },
-    {
-      "label": "Patch IAT (Engine.dll)",
-      "task": "IAT: Adicionar import (add_import.py)",
-      "tooltip": "Adiciona l2ui.dll!L2UI_Init na tabela de imports da Engine.dll",
-      "color": "error"
-    }
-  ],
+  // Botões na barra de status: extensão Simple Task Buttons
+  // (condor304.task-buttons) — configuração em .vscode/task-buttons.json
   // Se usar a extensão CMake Tools (opcional), ela usa uma pasta separada
   // para não conflitar com as tasks acima. IMPORTANTE: selecione um kit x86
   // (Win32) na barra de status, pois o L2 é um cliente 32-bit.
