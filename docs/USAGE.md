@@ -223,7 +223,7 @@ backup and patch **Engine.dll** instead. Read §2 again.
 ## 7. Privacy & data
 
 - No accounts, no credentials — nothing is stored or sent anywhere.
-- Output = the dumped `.xdat`/`.ui` files plus a log with file
+- Output = the dumped `.xdat`/`.u` files plus a log with file
   paths, all inside the local `decrypted` folder.
 
 ---

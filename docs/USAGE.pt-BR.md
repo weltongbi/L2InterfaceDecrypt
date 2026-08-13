@@ -226,7 +226,7 @@ Restaure o backup do L2.exe e patcheie a **Engine.dll**. Releia §2.
 
 - Sem contas, sem credenciais — nada é armazenado nem enviado pra
   lugar nenhum.
-- Saída = os arquivos `.xdat`/`.ui` dumpados + um log com caminhos
+- Saída = os arquivos `.xdat`/`.u` dumpados + um log com caminhos
   de arquivo, tudo dentro da pasta local `decrypted`.
 
 ---
