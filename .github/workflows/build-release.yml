@@ -43,7 +43,7 @@ jobs:
           cmake --build build
 
       # Empacota o release: l2ui.zip com a DLL + o template do INI.
-      - name: 'Package (l2ui.zip: l2ui.dll + l2ui.ini.example)'
+      - name: "Package (l2ui.zip: l2ui.dll + l2ui.ini.example)"
         shell: pwsh
         run: |
           New-Item -ItemType Directory -Path dist -Force | Out-Null
